@@ -1,5 +1,6 @@
 # Fixed Dockerfile for Render / Railway / any Docker host
-FROM oven/bun:1
+# Node image + Bun installed with npm (works everywhere; avoids "bun: not found" / exit code 127)
+FROM node:20-bookworm-slim
 WORKDIR /app
 
 # Chromium is used by the Cloudflare bypass (src/services/cfBypass.js looks for /usr/bin/chromium)
@@ -7,7 +8,10 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends chromium ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# Install packages (no lockfile copied, so the old "bun.lockb not found" error cannot happen)
+# Install Bun, and show its version so the build log proves it worked
+RUN npm install -g bun && bun --version
+
+# Install packages
 COPY package.json ./
 RUN bun install --production
 
